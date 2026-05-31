@@ -1,25 +1,3 @@
-# EntriAlert — Autonomous Security Decision Support
-
-> Convert thousands of security alerts into a handful of trusted decisions.  
-> One operator. No SOC team required.
-
----
-
-## What is this?
-
-EntriAlert is a 3-layer system:
-
-```
-[ Endpoint Agent ]  →  [ Backend API ]  →  [ Web Dashboard ]
-   Python agent          FastAPI             Next.js
-   Collects events       Rule engine         Live decisions
-   Sends telemetry       WebSocket           Operator feedback
-```
-
-The agent runs on Windows machines, collects security signals, and sends them to the backend. The backend runs rules against every event and produces a clear decision — what happened, why it matters, and what to do. The dashboard shows everything live.
-
----
-
 ## Repo Structure
 
 ```
@@ -133,14 +111,14 @@ Open **3 terminals** from the project root and run one command in each.
 ```bash
 python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 ```
-✅ Ready when you see: `Application startup complete.`
+Ready when you see: `Application startup complete.`
 
 ### Terminal 2 — Frontend
 ```bash
 cd entrialert
 npm run dev
 ```
-✅ Ready when you see: `Ready on http://localhost:3000`
+Ready when you see: `Ready on http://localhost:3000`
 
 ### Terminal 3 — Agent
 ```bash
@@ -149,7 +127,7 @@ python -m agent.main
 > Run as **Administrator** for full Windows Event Log access.  
 > Without admin, process and network monitoring still work.
 
-✅ Ready when you see: `Device: <hostname> — <ip>`
+Ready when you see: `Device: <hostname> — <ip>`
 
 ---
 
@@ -162,29 +140,6 @@ python -m agent.main
 | API Docs | http://localhost:8000/docs | FastAPI auto-docs |
 
 ---
-
-## How the Data Flows
-
-```
-Agent (every 15–30s)
-  ├── log_collector     → reads Windows Security Event Log
-  ├── process_monitor   → scans running processes with psutil
-  └── network_monitor   → checks active network connections
-
-        ↓  POST /api/telemetry  (JSON + API key header)
-
-Backend
-  ├── pipeline.py       → runs rule engine on each event
-  ├── store.py          → saves decisions in memory
-  └── ws_manager.py     → broadcasts new decisions via WebSocket
-
-        ↓  WebSocket ws://localhost:8000/ws
-
-Dashboard
-  ├── Receives decisions in real time
-  ├── Operator clicks Approve / Reject / Mark Incorrect
-  └── Feedback POSTed to /api/decisions/{id}/feedback
-```
 
 ---
 
@@ -205,45 +160,3 @@ Create a `.env` file in the root to override:
 ENTRIALERT_API_URL=http://your-server:8000
 ENTRIALERT_API_KEY=your-secret-key
 ```
-
----
-
-## Event Types the Agent Detects
-
-| Event | Source | Severity |
-|---|---|---|
-| Failed login attempts | Windows Event Log (ID 4625) | MEDIUM / HIGH |
-| Admin logins | Windows Event Log (ID 4624) | MEDIUM |
-| Account lockouts | Windows Event Log (ID 4740) | HIGH |
-| PowerShell execution | Process monitor | HIGH / CRITICAL |
-| Suspicious executables (LOLBins) | Process monitor | MEDIUM |
-| Unknown script execution | Process monitor | MEDIUM |
-| Outbound connections | Network monitor | LOW |
-| Suspicious port connections | Network monitor | CRITICAL |
-
----
-
-## Team Roles & What to Work On
-
-| Role | Focus area |
-|---|---|
-| Frontend dev | `entrialert/app/` and `entrialert/components/` |
-| Backend dev | `backend/pipeline.py`, `backend/store.py`, add new rules |
-| Agent dev | `agent/collectors/`, add new collectors |
-| Full-stack | Connect all three, add PostgreSQL to replace in-memory store |
-
----
-
-## Known Limitations (MVP)
-
-- Store is **in-memory** — restarts clear all data. Replace `backend/store.py` with PostgreSQL for persistence.
-- Agent requires **admin rights** for Windows Event Log access.
-- No authentication on the dashboard yet.
-- Single-machine deployment — no multi-tenant support yet.
-
----
-
-## Authors
-
-- Mounika Bhargavi Giridi
-- Sai Charan Reddy Jajala
