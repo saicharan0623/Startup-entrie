@@ -5,10 +5,10 @@ import { Shield, Menu, X } from "lucide-react";
 
 const links = [
   { href: "/", label: "Home" },
-  { href: "/features", label: "Features" },
-  { href: "/how-it-works", label: "How It Works" },
-  { href: "/comparison", label: "Compare" },
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/compliance", label: "Compliance" },
+  { href: "/agent-setup", label: "Agent Setup" },
+  { href: "/settings", label: "Settings" },
   { href: "/contact", label: "Contact" },
 ];
 

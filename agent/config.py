@@ -22,6 +22,7 @@ class AgentSettings(BaseSettings):
     class Config:
         env_file = ".env"
         env_prefix = "ENTRIALERT_"
+        extra = "ignore"
 
 
 settings = AgentSettings()

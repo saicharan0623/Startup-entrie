@@ -1,5 +1,17 @@
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+export async function fetchCompliance() {
+  const res = await fetch(`${BASE}/api/compliance`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch compliance data");
+  return res.json();
+}
+
+export async function fetchDecision(id: string) {
+  const res = await fetch(`${BASE}/api/decisions/${id}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Decision not found");
+  return res.json();
+}
+
 export async function fetchDecisions(limit = 50, severity?: string) {
   const params = new URLSearchParams({ limit: String(limit) });
   if (severity) params.set("severity", severity);
