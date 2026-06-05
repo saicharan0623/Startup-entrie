@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
 import { ArrowRight, ChevronDown, ChevronUp, CheckCircle, XCircle, Flag, Tag } from "lucide-react";
 import Link from "next/link";
 import type { Decision } from "@/app/dashboard/page";
@@ -158,9 +158,8 @@ export default function AlertTable({
               const st = statusLabel(d);
               const isOpen = expanded === d.id;
               return (
-                <>
+                <React.Fragment key={d.id}>
                   <tr
-                    key={d.id}
                     className="cursor-pointer transition-colors"
                     style={{
                       background: isOpen ? "rgba(0,212,255,0.04)" : i % 2 === 0 ? "var(--background)" : "var(--card)",
@@ -214,7 +213,7 @@ export default function AlertTable({
                     </td>
                   </tr>
                   {isOpen && <ExpandedRow key={`exp-${d.id}`} d={d} onFeedback={onFeedback} />}
-                </>
+                </React.Fragment>
               );
             })}
           </tbody>
