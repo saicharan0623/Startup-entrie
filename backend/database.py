@@ -43,6 +43,9 @@ async def connect_db() -> None:
     await _db.events.create_index("id", unique=True)
     await _db.events.create_index("created_at")
     await _db.devices.create_index("hostname", unique=True)
+    await _db.users.create_index("email", unique=True)
+    await _db.users.create_index("id", unique=True)
+    await _db.rules.create_index("rule_id", unique=True)
     logger.info("MongoDB indexes ensured")
 
 

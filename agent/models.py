@@ -24,6 +24,12 @@ class EventType(str, Enum):
     OUTBOUND_IP = "OUTBOUND_IP"
     DNS_REQUEST = "DNS_REQUEST"
     SUSPICIOUS_PORT = "SUSPICIOUS_PORT"
+    # R004 — audit log disabled (Event ID 1102 / 4719)
+    AUDIT_LOG_DISABLED = "AUDIT_LOG_DISABLED"
+    # R005 — new local admin created (Event ID 4720 + 4732)
+    NEW_ADMIN_CREATED = "NEW_ADMIN_CREATED"
+    # R006 — Defender disabled (Event ID 5001 / 7036)
+    DEFENDER_DISABLED = "DEFENDER_DISABLED"
 
 
 class DeviceInfo(BaseModel):

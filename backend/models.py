@@ -6,6 +6,40 @@ from pydantic import BaseModel, Field
 import uuid
 
 
+# ── Auth models ───────────────────────────────────────────────────────────────
+
+class RegisterPayload(BaseModel):
+    name: str
+    email: str
+    password: str
+    organization_name: str
+
+
+class LoginPayload(BaseModel):
+    email: str
+    password: str
+
+
+class UserResponse(BaseModel):
+    id: str
+    name: str
+    email: str
+    organization_name: str
+    organization_id: str
+    role: str          # "admin" | "viewer"
+    api_key: str
+    created_at: str
+    last_login: str | None = None
+
+
+class UpdateRolePayload(BaseModel):
+    role: str          # "admin" | "viewer"
+
+
+class ToggleRulePayload(BaseModel):
+    enabled: bool
+
+
 class DevicePayload(BaseModel):
     hostname: str
     os: str
@@ -54,6 +88,7 @@ class DecisionRecord(BaseModel):
     business_impact: str
     recommended_action: str
     confidence: int
+    rule_id: str = ""           # R001–R010
     tags: list[str] = []
     device: DevicePayload | None = None
     created_at: datetime = Field(default_factory=datetime.utcnow)

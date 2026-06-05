@@ -12,14 +12,17 @@ from backend.database import get_db
 logger = logging.getLogger(__name__)
 
 CONTROL_MAP = {
-    "FAILED_LOGIN":       ("Access Control",      "Event ID 4625 — Failed login logs"),
-    "ACCOUNT_LOCKOUT":    ("Access Control",       "Event ID 4740 — Account lockout logs"),
-    "ADMIN_LOGIN":        ("Privileged Access",    "Event ID 4624 — Admin login logs"),
-    "POWERSHELL_EXEC":    ("Endpoint Protection",  "Event ID 4688 — Process execution logs"),
-    "PROCESS_SUSPICIOUS": ("Endpoint Protection",  "Event ID 4688 — Process execution logs"),
-    "UNKNOWN_SCRIPT":     ("Endpoint Protection",  "Script execution logs"),
-    "SUSPICIOUS_PORT":    ("Network Security",     "Network connection logs"),
-    "OUTBOUND_IP":        ("Network Security",     "Outbound connection logs"),
+    "FAILED_LOGIN":        ("Access Control",        "Event ID 4625 — Failed login logs"),
+    "ACCOUNT_LOCKOUT":     ("Access Control",        "Event ID 4740 — Account lockout logs"),
+    "ADMIN_LOGIN":         ("Privileged Access",     "Event ID 4624 — Admin login logs"),
+    "POWERSHELL_EXEC":     ("Endpoint Protection",   "Event ID 4688 — Process execution logs"),
+    "PROCESS_SUSPICIOUS":  ("Endpoint Protection",   "Event ID 4688 — Process execution logs"),
+    "UNKNOWN_SCRIPT":      ("Endpoint Protection",   "Script execution logs"),
+    "SUSPICIOUS_PORT":     ("Network Security",      "Network connection logs"),
+    "OUTBOUND_IP":         ("Network Security",      "Outbound connection logs"),
+    "AUDIT_LOG_DISABLED":  ("Logging & Monitoring",  "Event ID 1102/4719 — Audit policy logs"),
+    "NEW_ADMIN_CREATED":   ("Privileged Access",     "Event ID 4720/4732 — Account creation logs"),
+    "DEFENDER_DISABLED":   ("Endpoint Protection",   "Event ID 5001/7036 — Defender status logs"),
 }
 
 
@@ -57,6 +60,26 @@ async def add_event(event: EventPayload, device: DevicePayload) -> None:
 async def get_events(limit: int = 100) -> list[dict]:
     cursor = _db().events.find({}, {"_id": 0}).sort("timestamp", -1).limit(limit)
     return [doc async for doc in cursor]
+
+
+async def get_recent_failed_logins(since_iso: str) -> list[dict]:
+    """Return FAILED_LOGIN events since `since_iso` for R001/R002 cross-batch counting."""
+    cursor = _db().events.find(
+        {"event_type": "FAILED_LOGIN", "timestamp": {"$gte": since_iso}},
+        {"_id": 0, "raw": 1},
+    )
+    return [doc async for doc in cursor]
+
+
+async def has_recent_r008(hostname: str, within_minutes: int = 30) -> bool:
+    """Return True if an R008 offline decision was already created for this device recently."""
+    cutoff = (datetime.utcnow() - timedelta(minutes=within_minutes)).isoformat()
+    doc = await _db().decisions.find_one({
+        "rule_id": "R008",
+        "device.hostname": hostname,
+        "created_at": {"$gte": cutoff},
+    })
+    return doc is not None
 
 
 # ── Decisions ─────────────────────────────────────────────────────────────────
